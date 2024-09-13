@@ -1,38 +1,41 @@
-
 FROM python:3.9-slim
 
-
+# Working directory
 WORKDIR /app
 
+# Copying all files to the container
 COPY . /app
 
-
-# Install Node.js (LTS version) and npm
+# Install required packages for installation and build
 RUN apt-get update && \
-    apt-get install -y curl && \
-    curl -fsSL https://deb.nodesource.com/setup_16.x | bash - && \
+    apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    gnupg \
+    build-essential && \
+    rm -rf /var/lib/apt/lists/*
+
+# Installing Node.js (LTS version) and npm
+RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - && \
     apt-get install -y nodejs && \
     npm install -g npm && \
-    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install g++
+# Installing g++ (required for compiling C++ code)
 RUN apt-get update && \
     apt-get install -y g++ && \
-    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Java
+# Installing Java (for Java-based code execution)
 RUN apt-get update && \
     apt-get install -y default-jdk && \
-    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Expose the port the app runs on
+# Exposing the port Flask runs on
 EXPOSE 5000
 
-# Define environment variable
+# Setting environment variables for Flask
 ENV FLASK_APP=app.py
 
-# Run the Flask application
+# Running the Flask application
 CMD ["flask", "run", "--host=0.0.0.0"]
