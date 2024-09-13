@@ -1,26 +1,30 @@
 # Use an official Python runtime as a parent image
-FROM python:3.9-slim
+FROM python:3.9
 
 # Set the working directory in the container
 WORKDIR /app
 
+# Install dependencies for Node.js, g++, Java, and Git
+RUN apt-get update && apt-get install -y \
+    nodejs \
+    npm \
+    g++ \
+    default-jdk \
+    git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy the current directory contents into the container at /app
 COPY . /app
 
-
-# Install Node.js
-RUN apt-get update && apt-get install -y nodejs npm
-
-# Install g++
-RUN apt-get install -y g++
-
-# Install Java
-RUN apt-get install -y default-jdk
+# Install Python dependencies (if you have a requirements.txt file)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Expose the port the app runs on
 EXPOSE 5000
 
-# Define environment variable
+# Define environment variable for Flask
 ENV FLASK_APP=app.py
 
 # Run the Flask application
